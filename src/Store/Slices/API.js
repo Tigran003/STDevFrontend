@@ -32,7 +32,7 @@ export const requestGetRoomsData = createAsyncThunk(
       return rejectWithValue(error.message);
     }
   }
-)
+);
 export const requestGetCurrentRoom = createAsyncThunk(
   "MovieData/requestGetCurrentRoom",
   async (id, { rejectWithValue }) => {
@@ -52,17 +52,12 @@ export const requestGetCurrentRoom = createAsyncThunk(
 export const requestGetOnlyRoom = createAsyncThunk(
   "MovieData/requestGetOnlyRoom",
   async (id, { rejectWithValue }) => {
-   
-    
     try {
-      const response = await axios.get(
-        `${api_url}/rooms/${id}/`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.get(`${api_url}/rooms/${id}/`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -74,14 +69,11 @@ export const requestGetOnlyRoomMovie = createAsyncThunk(
   "MovieData/requestGetOnlyRoomMovie",
   async (id, { rejectWithValue }) => {
     try {
-      const response = await axios.get(
-        `${api_url}/movie/?id=${id}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.get(`${api_url}/movie/?id=${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -93,15 +85,27 @@ export const requestPostRoomMovieSeat = createAsyncThunk(
   "MovieData/requestPostRoomMovieSeat",
   async (data, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
-        `${api_url}/seat/`,
-        data,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.post(`${api_url}/seat/`, data, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const requestGetCurrentMovieSeats = createAsyncThunk(
+  "MovieData/requestGetCurrentMovieSeats",
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${api_url}/seat/?schedule=${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.message);

@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
+  requestGetCurrentMovieSeats,
   requestGetCurrentRoom,
   requestGetMovieData,
   requestGetOnlyRoom,
@@ -16,7 +17,8 @@ const MovieSlice = createSlice({
     MoviesRooms: [],
     MoviesCurrentRoom: [],
     MoviesOnlyRoom: [],
-    MoviesOnlyMovie: []
+    MoviesOnlyMovie: [],
+    MovieCurrentMovieSeats: []
   },
   extraReducers: (builder) => {
     builder
@@ -45,6 +47,9 @@ const MovieSlice = createSlice({
       })
       .addCase(requestGetOnlyRoomMovie.fulfilled, (state, { payload }) => {
         state.MoviesOnlyMovie = payload;
+      })
+      .addCase(requestGetCurrentMovieSeats.fulfilled, (state, {payload}) => {
+        state.MovieCurrentMovieSeats = payload
       });
   },
 });

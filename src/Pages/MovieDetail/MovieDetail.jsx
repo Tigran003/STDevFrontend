@@ -97,7 +97,7 @@ const MovieDetail = () => {
           <div 
             className="MovieDetail-bgImage" 
             style={{ 
-              transform: rotateX(${rotation}deg) 
+              transform: `rotateX(${rotation}deg)` 
             }} 
           > 
             <img src={background_image} alt="" /> 

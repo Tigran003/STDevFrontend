@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { selectMovieData } from "../../Store/Slices/MovieSlice";
 import {
+  requestGetCurrentMovieSeats,
   requestGetCurrentRoom,
   requestGetOnlyRoom,
   requestGetOnlyRoomMovie,
@@ -13,22 +14,17 @@ import {
 const MovieDetail = () => {
   const { id, movie } = useParams();
   const dispatch = useDispatch();
-  const { MoviesOnlyRoom, MoviesOnlyMovie, MoviesCurrentRoom } =
-    useSelector(selectMovieData);
+  const {
+    MoviesOnlyRoom,
+    MoviesOnlyMovie,
+    MoviesCurrentRoom,
+    MovieCurrentMovieSeats,
+  } = useSelector(selectMovieData);
   const { background_image, duration, price, title, poster } =
     MoviesOnlyMovie?.[0] || [];
   const { rows, seats_per_row } = MoviesOnlyRoom;
   const scheduleId = MoviesCurrentRoom?.length > 0 && MoviesCurrentRoom?.[0].id;
-
-  const [disabledSeats, setDisabledSeats] = useState([]);
-
-  // Load disabled seats from localStorage
-  useEffect(() => {
-    const storedSeats = localStorage.getItem(`disabledSeats-${id}`);
-    if (storedSeats) {
-      setDisabledSeats(JSON.parse(storedSeats));
-    }
-  }, [id]);
+  const [rotation, setRotation] = useState(-10);
 
   useEffect(() => {
     if (id) {
@@ -43,36 +39,63 @@ const MovieDetail = () => {
     if (id) {
       dispatch(requestGetCurrentRoom(id));
     }
-  }, [id, dispatch]);
+    if (scheduleId) {
+      dispatch(requestGetCurrentMovieSeats(scheduleId));
+    }
+  }, [id, dispatch, scheduleId]);
 
   const handleSchedule = async (row, col) => {
-    const seatKey = `${row}-${col}`;
-    const updatedSeats = [...disabledSeats, seatKey];
-    setDisabledSeats(updatedSeats);
-    localStorage.setItem(`disabledSeats-${id}`, JSON.stringify(updatedSeats));
+    // const newObj = {
+    //   position: `${row}, ${col}`,
+    //   schedule: scheduleId,
+    // };
 
     const newObj = {
-      position: [row, col],
+      position: [row,col],
       schedule: scheduleId,
     };
 
     try {
-      await dispatch(requestPostRoomMovieSeat(newObj));
+      await dispatch(requestPostRoomMovieSeat(newObj)).unwrap();
+      await dispatch(requestGetCurrentMovieSeats(scheduleId));
     } catch (error) {
-      const revertedSeats = disabledSeats.filter((seat) => seat !== seatKey);
-      setDisabledSeats(revertedSeats);
-      localStorage.setItem(
-        `disabledSeats-${id}`,
-        JSON.stringify(revertedSeats)
-      );
+      alert("This seat is already not exist");
     }
   };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+
+      const maxScroll = 300;
+      const minRotation = -10;
+      const maxRotation = 0;
+      const calculatedRotation =
+        scrollY > maxScroll
+          ? maxRotation
+          : minRotation + (scrollY / maxScroll) * (maxRotation - minRotation);
+
+      setRotation(calculatedRotation);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
 
   return (
     <div className="MovieDetail">
       <div className="container-fluid">
         <div className="MovieDetail-bg">
-          <div className="MovieDetail-bgImage">
+          <div
+            className="MovieDetail-bgImage"
+            style={{
+              transform: `rotateX(${rotation}deg)`,
+            }}
+          >
             <img src={background_image} alt="" />
           </div>
           <div className="MovieDetail-poster">
@@ -88,34 +111,34 @@ const MovieDetail = () => {
         </div>
       </div>
       <div className="MovieDetail-room">
-        <div className="MovieDetail-roomInner">
-          {Array.from({ length: rows }).map((_, indexRow) => (
-            <div className="MovieDetail-roomInner-rows" key={indexRow}>
-              <span style={{ lineHeight: "39px", width: "9.75px" }}>
-                {indexRow + 1}
-              </span>
-              {Array.from({ length: seats_per_row }).map((_, indexCol) => {
-                const seatKey = `${indexRow + 1}-${indexCol + 1}`;
-                const isDisabled = disabledSeats.includes(seatKey);
+        {Array.from({ length: rows }).map((_, indexRow) => (
+          <div className="MovieDetail-roomInner-rows" key={indexRow}>
+            <span style={{ lineHeight: "39px", width: "9.75px" }}>
+              {indexRow + 1}
+            </span>
+            {Array.from({ length: seats_per_row }).map((_, indexCol) => {
+              const isDisabled = MovieCurrentMovieSeats?.length > 0 && MovieCurrentMovieSeats.some((item) => {
+                const [row, col] = item.position.split(",").map(Number);
+                return row === indexRow + 1 && col === indexCol + 1;
+              });
 
-                return (
-                  <button
-                    key={indexCol}
-                    onClick={() => handleSchedule(indexRow + 1, indexCol + 1)}
-                    disabled={isDisabled}
-                    style={{
-                      backgroundColor: isDisabled ? "gray" : "#fff",
-                      color: "#000",
-                      cursor: isDisabled ? "not-allowed" : "pointer",
-                    }}
-                  >
-                    <span>{indexCol + 1}</span>
-                  </button>
-                );
-              })}
-            </div>
-          ))}
-        </div>
+              return (
+                <button
+                  key={indexCol}
+                  onClick={() => handleSchedule(indexRow + 1, indexCol + 1)}
+                  disabled={isDisabled}
+                  style={{
+                    backgroundColor: isDisabled ? "gray" : "#fff",
+                    color: isDisabled ? "#ccc" : "#000",
+                    cursor: isDisabled ? "not-allowed" : "pointer",
+                  }}
+                >
+                  <span>{indexCol + 1}</span>
+                </button>
+              );
+            })}
+          </div>
+        ))}
       </div>
     </div>
   );

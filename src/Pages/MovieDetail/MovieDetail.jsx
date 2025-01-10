@@ -127,15 +127,7 @@ const MovieDetail = () => {
                   const [row, col] = item?.position; 
                   return row === indexRow + 1 && col === indexCol + 1; 
                 }); 
-              // const isDisabled = 
-              //   MovieCurrentMovieSeats?.length > 0 && 
-              //
-
-MovieCurrentMovieSeats.some((item) => { 
-              //     const [row, col] = item.position.split(",").map(Number); 
-              //     return row === indexRow + 1 && col === indexCol + 1; 
-              //   }); 
- 
+              
               return ( 
                 <button 
                   key={indexCol} 

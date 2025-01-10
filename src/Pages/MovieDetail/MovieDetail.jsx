@@ -117,10 +117,8 @@ const MovieDetail = () => {
               {indexRow + 1}
             </span>
             {Array.from({ length: seats_per_row }).map((_, indexCol) => {
-              const isDisabled = MovieCurrentMovieSeats?.length > 0 && MovieCurrentMovieSeats.some((item) => {
-                const [row, col] = item && item.position?.split(",")?.map(Number);
-                return row === indexRow + 1 && col === indexCol + 1;
-              });
+              const isDisabled = MovieCurrentMovieSeats?.length > 0 && MovieCurrentMovieSeats.some((item) => {  const [row, col] = item.position; // Позиция уже массив, так что мы можем сразу деструктурировать его.
+  return row === indexRow + 1 && col === indexCol + 1;});
 
               return (
                 <button

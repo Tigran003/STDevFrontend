@@ -118,7 +118,7 @@ const MovieDetail = () => {
             </span>
             {Array.from({ length: seats_per_row }).map((_, indexCol) => {
               const isDisabled = MovieCurrentMovieSeats?.length > 0 && MovieCurrentMovieSeats.some((item) => {
-                const [row, col] = item.position.split(",").map(Number);
+                const [row, col] = item && item?.position?.split(",")?.map(Number);
                 return row === indexRow + 1 && col === indexCol + 1;
               });
 
